@@ -1,36 +1,6 @@
-FROM alpine:3.9 AS build
-
-# Install Dependencies
-RUN apk add --no-cache -U alpine-sdk bash curl libuv-dev zlib-dev \
-                          util-linux-dev libmnl-dev gcc make git autoconf \
-                          automake pkgconfig python logrotate openssl-dev \
-			  cmake
-WORKDIR /netdata
-COPY . .
-# Create some directories netdata needs
-RUN mkdir -p \
-	/etc/netdata \
-	/var/log/netdata \
-	/var/lib/netdata \
-	/var/cache/netdata \
-	/usr/lib/netdata/conf.d \
-	/usr/libexec/netdata/plugins.d
-
-# Fix permissions/ownerships
-RUN chown -R netdata:netdata \
-	/etc/netdata/ \
-	/usr/lib/netdata/ \
-	/usr/share/netdata/ \
-	/var/log/netdata \
-	/var/lib/netdata \
-	/var/cache/netdata  \
-	/usr/libexec/netdata
-
-VOLUME /etc/netdata
-VOLUME /var/lib/netdata
-VOLUME /var/log/netdata
-
+FROM wordpress
+RUN cd /tmp \
+&& apt-get update && apt-get install -y curl apt-utils wget unzip iproute2\
+&& rm -rf /var/lib/apt/lists/*
+RUN wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh && sh /tmp/netdata-kickstart.sh --stable-channel --claim-token l4z4PtW5R0A2PrZiwoT5MM7iTh1Ujfu2U15rU11ZQr2-tV0-a594vVoiQrg6bXKRJeKJd8ea7yZey5MB9gqkI04zhZYkRi5kn7FG8U9C4omkQfCEgHy3oMHIV-9lKAVweBIQRdw --claim-rooms a0ce157a-617d-43c9-987b-eca46a30131d 
 EXPOSE 19999/tcp
-USER netdata
-
-CMD ["/usr/sbin/netdata", "-D"]
