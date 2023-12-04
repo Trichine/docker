@@ -1,24 +1,40 @@
-# Version de Docker Compose à utiliser
-version: "3.3"
-# Nom du premier service
+version: '3'
 services:
   frontend:
-   # Image Docker utilisée pour ce service
-    image: wordpress
-    # Mappage des ports :le premier port sur l'hôte et le second celui du conteneur
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: wordpress
+    pid: host
+    restart: unless-stopped
     ports:
       - "8080:80"
-    # Définition d'un réseau personnalisé  
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdataconfig:/etc/netdata
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-    # Type de réseau driver:bridge
       - front-tier
       - back-tier
       - phpmyadmin-tier
-
+    
   phpmyadmin:
     image: phpmyadmin
+    container_name: phpmyadmin
     ports:
-      - "8060:80"
+      - "8050:80"
     networks:
       - front-tier
       - back-tier
@@ -33,10 +49,11 @@ services:
     links:
       - backend:mysql
     volumes:
-      - db-data:/etc/data 
+      - db-data:/etc/data
 
   backend:
     image: mariadb
+    container_name: mariadb
     volumes:
       - db-data:/etc/data
     networks:
@@ -49,13 +66,13 @@ services:
       - MYSQL_DATABASE=wordpress
 
 volumes:
-  db-data:
+    db-data:
+    netdataconfig:
+    netdatalib:
+    netdatacache:
 
-configs:
-  httpd-config:
-    external: true
 networks:
-
+  # The presence of these objects is sufficient to define them
   front-tier: 
     driver: bridge
   back-tier: 
