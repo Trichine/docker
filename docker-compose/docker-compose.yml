@@ -1,0 +1,65 @@
+# Version de Docker Compose à utiliser
+version: "3.3"
+# Nom du premier service
+services:
+  frontend:
+   # Image Docker utilisée pour ce service
+    image: wordpress
+    # Mappage des ports :le premier port sur l'hôte et le second celui du conteneur
+    ports:
+      - "8080:80"
+    # Définition d'un réseau personnalisé  
+    networks:
+    # Type de réseau driver:bridge
+      - front-tier
+      - back-tier
+      - phpmyadmin-tier
+
+  phpmyadmin:
+    image: phpmyadmin
+    ports:
+      - "8060:80"
+    networks:
+      - front-tier
+      - back-tier
+      - phpmyadmin-tier
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST : backend
+      MYSQL_USERNAME: root
+      MYSQL_ROOT_PASSWORD: Denver26
+    depends_on:
+      - backend
+    links:
+      - backend:mysql
+    volumes:
+      - db-data:/etc/data 
+
+  backend:
+    image: mariadb
+    volumes:
+      - db-data:/etc/data
+    networks:
+      - back-tier
+    environment:
+      - MYSQL_ROOT_PASSWORD=Denver26
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=mysql
+      - MYSQL_DATABASE=mysql
+      - MYSQL_DATABASE=wordpress
+
+volumes:
+  db-data:
+
+configs:
+  httpd-config:
+    external: true
+networks:
+
+  front-tier: 
+    driver: bridge
+  back-tier: 
+    driver: bridge
+    internal: true
+  phpmyadmin-tier: 
+    driver: bridge

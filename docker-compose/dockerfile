@@ -1,0 +1,36 @@
+FROM alpine:3.9 AS build
+
+# Install Dependencies
+RUN apk add --no-cache -U alpine-sdk bash curl libuv-dev zlib-dev \
+                          util-linux-dev libmnl-dev gcc make git autoconf \
+                          automake pkgconfig python logrotate openssl-dev \
+			  cmake
+WORKDIR /netdata
+COPY . .
+# Create some directories netdata needs
+RUN mkdir -p \
+	/etc/netdata \
+	/var/log/netdata \
+	/var/lib/netdata \
+	/var/cache/netdata \
+	/usr/lib/netdata/conf.d \
+	/usr/libexec/netdata/plugins.d
+
+# Fix permissions/ownerships
+RUN chown -R netdata:netdata \
+	/etc/netdata/ \
+	/usr/lib/netdata/ \
+	/usr/share/netdata/ \
+	/var/log/netdata \
+	/var/lib/netdata \
+	/var/cache/netdata  \
+	/usr/libexec/netdata
+
+VOLUME /etc/netdata
+VOLUME /var/lib/netdata
+VOLUME /var/log/netdata
+
+EXPOSE 19999/tcp
+USER netdata
+
+CMD ["/usr/sbin/netdata", "-D"]
