@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "docker-compose",
+			"path": "../docker-compose"
+		},
+		{
+			"name": "docker",
+			"path": "../docker"
+		},
+		{
+			"name": "netdata",
+			"path": "."
+		}
+	],
+	"settings": {}
+}
