@@ -1,0 +1,28 @@
+FROM wordpress
+
+# Définir un répertoire de travail
+WORKDIR /tmp
+
+# Installation des dépendances et nettoyage
+RUN apt-get update \
+    && apt-get install -y curl apt-utils wget unzip iproute2 \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Téléchargement et installation de Netdata
+RUN wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh \
+    && sh /tmp/netdata-kickstart.sh --stable-channel --claim-token l4z4PtW5R0A2PrZiwoT5MM7iTh1Ujfu2U15rU11ZQr2-tV0-a594vVoiQrg6bXKRJeKJd8ea7yZey5MB9gqkI04zhZYkRi5kn7FG8U9C4omkQfCEgHy3oMHIV-9lKAVweBIQRdw --claim-rooms a0ce157a-617d-43c9-987b-eca46a30131d
+
+# Nettoyage du répertoire temporaire
+RUN rm -rf /tmp/*
+
+WORKDIR /var/www/html
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# EXPOSE n'est pas nécessaire si vous utilisez Docker Compose
+# EXPOSE 19999/tcp
