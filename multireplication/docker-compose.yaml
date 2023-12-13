@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  sql-01:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    container_name: SQL-01
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: badass
+    ports:
+      - "3308:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./sql-scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: ["--default-authentication-plugin=mysql_native_password"]
+
+  sql-svg:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    container_name: SQL-SVG
+    environment:
+      - MYSQL_ROOT_PASSWORD=1234
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=1234
+      - MYSQL_DATABASE=badass
+      - CRONH=*/2
+      - CRONM=*
+    volumes:
+      - /data/svg-data/db:/svg-data
+      - ./sql-scripts:/sql-scripts
+    command: ["--init-file", "/sql-scripts/init.sql"]
+
+volumes:
+  db-data:
